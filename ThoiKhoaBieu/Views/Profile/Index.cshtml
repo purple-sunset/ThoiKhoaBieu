@@ -1,0 +1,110 @@
+﻿@model ThoiKhoaBieu.Models.ProfileViewModel
+@{
+    Layout = "~/Views/Shared/_Layout.cshtml";
+    ViewBag.Title = "Thông tin cá nhân";
+    var sexList = new SelectList(new List<Object>
+    {
+        new {text = "Nam"},
+        new {text = "Nữ"}
+    }, "text", "text");
+}
+
+<div class="row">
+    <div class="col-lg-10">
+        <h2 class="page-header" style="text-align: center;">@ViewBag.Title</h2>
+    </div>
+    <!-- /.col-lg-12 -->
+</div>
+<!-- /.row -->
+<div class="row">
+    <div class="col-lg-10">
+        <div class="panel panel-primary">
+            <div class="panel-body">
+                <form action=@Url.Action("Index", "Profile") id="MainForm" method="post">
+                    @Html.AntiForgeryToken()
+                    @Html.ValidationSummary(true, "", new {@class = "text-danger"})
+                    <div class="row form-group" style="display: none;">
+                        <div class="col-lg-3">@Html.LabelFor(m => m.UserId)</div>
+                        <div class="col-lg-7">@Html.TextBoxFor(m => m.UserId, new {@class = "form-control", @readonly = "readonly"})</div>
+                    </div>
+
+                    <div class="row form-group">
+                        <div class="col-lg-3">@Html.LabelFor(m => m.UserName)</div>
+                        <div class="col-lg-7">@Html.TextBoxFor(m => m.UserName, new {@class = "form-control", @readonly = "readonly"})</div>
+                    </div>
+
+                    <div class="row form-group">
+                        <div class="col-lg-3">@Html.LabelFor(m => m.FullName)</div>
+                        <div class="col-lg-7">@Html.TextBoxFor(m => m.FullName, new {@class = "form-control"})</div>
+                    </div>
+
+                    <div class="row form-group">
+                        <div class="col-lg-3">@Html.LabelFor(m => m.Sex)</div>
+                        <div class="col-lg-7">@Html.DropDownListFor(m => m.Sex, sexList, new { @class = "form-control" })</div>
+                    </div>
+
+                    <div class="row form-group">
+                        <div class="col-lg-3">@Html.LabelFor(m => m.BirthDay)</div>
+                        @using JQueryUIHelpers
+                        <div class="col-lg-7">@Html.JQueryUI().DatepickerFor(m => m.BirthDay)</div>
+                    </div>
+
+                    <div class="row form-group">
+                        <div class="col-lg-3">@Html.LabelFor(m => m.Address)</div>
+                        <div class="col-lg-7">@Html.TextBoxFor(m => m.Address, new {@class = "form-control"})</div>
+                    </div>
+
+                    <div class="row form-group">
+                        <div class="col-lg-3">@Html.LabelFor(m => m.Email)</div>
+                        <div class="col-lg-7">@Html.TextBoxFor(m => m.Email, new {@class = "form-control", @readonly = "readonly"})</div>
+                    </div>
+
+                    <div class="row form-group">
+                        <div class="col-lg-3">@Html.LabelFor(m => m.PhoneNumber)</div>
+                        <div class="col-lg-7">@Html.TextBoxFor(m => m.PhoneNumber, new {@class = "form-control"})</div>
+                    </div>
+
+                    <div class="row form-group">
+                        <div class="col-lg-5 col-lg-offset-3" style="margin-top: 1cm;">
+                            <input value="Lưu thông tin" onclick="UpdateProfileClick()" class="btn btn-lg btn-success btn-block"/>
+                        </div>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    function UpdateProfileClick() {
+        var $form = $("#MainForm");
+        $.ajax({
+            type: "POST",
+            url: $form.attr('action'),
+            data: $form.serialize(),
+            error: function (xhr, status, error) {
+                alert("fail");
+            },
+            success: function (response) {
+                if (response === "Error")
+                    swal({
+                        title: "!",
+                        text: "Có lỗi xảy ra, không thể cập nhật thông tin!",
+                        type: "error"
+                    });
+                else if (response === "OK") {
+                    swal({
+                        title: "!",
+                        text: "Thành công",
+                        type: "success"
+                    },
+                    function () {
+                        window.location.href = @Url.Action("Index", "Home");
+                    });
+                    window.location.href = @Url.Action("Index", "Home");
+                }
+                $('body').addClass('loaded');
+            }
+        });
+    }
+</script>

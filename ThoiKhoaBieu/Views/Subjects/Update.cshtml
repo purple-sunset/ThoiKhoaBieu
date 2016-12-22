@@ -1,0 +1,77 @@
+﻿@model ThoiKhoaBieu.Models.Subject
+
+@{
+    ViewBag.Title = "Create";
+}
+
+<style>
+    .FormItem {
+        margin-bottom: 10px;
+    }
+</style>
+
+<div class="col-xs-12">
+    <form action=@Url.Action("Update", "Subjects") id="MainForm" method="post">
+        <div class="col-sm-6 col-xs-12 FormItem" style="display: none;">
+            <label class="col-xs-4"> Mã Môn Học </label>
+            <div class="col-xs-8">
+                @Html.TextBoxFor(m => m.ID, new { @class = "form-control" })
+            </div>
+        </div>  
+        
+    <div class="col-sm-6 col-xs-12 FormItem">
+            <label class="col-xs-4"> Tên Môn Học </label>
+            <div class="col-xs-8">
+                @Html.TextBoxFor(m => m.Name, new { @class = "form-control" })
+            </div>
+        </div>
+
+        <div class="col-sm-6 col-xs-12 FormItem">
+            <label class="col-xs-4"> Cần máy chiếu </label>
+            <div class="col-xs-8">
+                @Html.CheckBoxFor(m => m.RequireProjector, new { @class = "form-control" })
+            </div>
+        </div>
+        <div class="col-xs-12 FormItem">
+            <div class="col-xs-12">
+                <input class="btn btn-primary" value="OK" onclick="UpdateSubjectClick()" type="button" style="width: 100px; float: right;">
+            </div>
+        </div>
+    </form>
+</div>
+
+<script>
+    function UpdateSubjectClick(){
+        var $form = $("#MainForm");
+        $.ajax({
+            type: "POST",
+            url: $form.attr('action'),
+            data: $form.serialize(),
+            error: function (xhr, status, error) {
+                alert("fail");
+            },
+            success: function (response) {
+                if (response === "Error")
+                    swal({
+                        title: "!",
+                        text: "Có lỗi xảy ra, không thể thêm mới chủ đề!",
+                        type: "error"
+                    });
+                else if (response === "OK") {
+                    swal({
+                        title: "!",
+                        text: "Thành công",
+                        type: "success"
+                    },
+                    function () {
+                        window.location.href = "@Url.Action("Index", "Subjects")";
+                    });
+                    window.location.href = "@Url.Action("Index", "Subjects")";
+                }
+                $('body').addClass('loaded');
+            }
+        });
+    }
+
+    $("#IncomingCallHeader").css("background-color: white");
+</script>

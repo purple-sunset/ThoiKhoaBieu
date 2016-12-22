@@ -1,0 +1,146 @@
+﻿@using Kendo.Mvc.UI
+@using ThoiKhoaBieu.Models
+@model IEnumerable<ThoiKhoaBieu.Models.ScheduleViewModel>
+
+@{
+    ViewBag.Title = "Danh sách môn học";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+    
+}
+
+<div class="row">
+    <div class="col-lg-12">
+        <h2 class="page-header" style="text-align: center;">@ViewBag.Title</h2>
+    </div>
+    <!-- /.col-lg-12 -->
+</div>
+
+<div class="row">
+    <div class="col-lg-12">
+        <div class="panel panel-primary">
+            <div class="panel-body">
+                <input class="btn btn-primary" value="THÊM" id="AddScheduleButton" onclick="AddSchedule()" type="button" style="width: 100px">
+                <input class="btn btn-info" value="SỬA" id="UpdateScheduleButton" onclick="UpdateSchedule()" type="button" style="width: 100px">
+                <input class="btn btn-danger" value="XÓA" id="DeleteScheduleButton" onclick="DeleteSchedule()" type="button" style="width: 100px">
+                
+
+                @(Html.Kendo().Grid(Model)
+                      .Name("listSchedule")
+                      .Columns(columns =>
+                      {
+                          columns.Bound(p => p.DayOfWeek).Width(200);
+                          columns.Bound(p => p.PartOfDay).Width(200);
+                          columns.Bound(p => p.TimeLong).Width(200);
+                          columns.Bound(p => p.RoomName).Width(200);
+                          columns.Bound(p => p.ClassName).Width(200);
+                          columns.Bound(p => p.SubjectName).Width(200);
+
+                      })
+                      .HtmlAttributes(new {style = "height:400px;"})
+                      .Pageable(pageable => pageable
+                          .Input(true)
+                          .Numeric(false)
+                      )
+
+                      .Scrollable()
+                      .Selectable(selectable => selectable
+                          .Mode(GridSelectionMode.Multiple))
+                      .Navigatable()
+                      .DataSource(dataSource => dataSource
+                          .Ajax()
+                          .PageSize(20)
+                          .ServerOperation(false)
+                      )
+                      )
+                
+                <div class="modal" role="dialog" id="PopupAddSchedule" style="overflow-y: scroll;">
+                    <div style="height: 357px;" class="modal-backdrop  in"></div>
+                    <div class="modal-dialog modal-lg">
+                        <div class="modal-content">
+                            <div class="modal-header">
+                                <button type="button" class="close" data-dismiss="modal">×</button>
+                                <h4 class="modal-title">THÊM LỊCH HỌC</h4>
+                            </div>
+                            <div class="modal-body">
+                                <div id="AddSchedule"></div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="modal" role="dialog" id="PopupUpdateSchedule" style="overflow-y: scroll;">
+                    <div style="height: 357px;" class="modal-backdrop  in"></div>
+                    <div class="modal-dialog modal-lg">
+                        <div class="modal-content">
+                            <div class="modal-header">
+                                <button type="button" class="close" data-dismiss="modal">×</button>
+                                <h4 class="modal-title">THÔNG TIN LỊCH HỌC</h4>
+                            </div>
+                            <div class="modal-body">
+                                <div id="UpdateSchedule"></div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+
+    function AddSchedule() {
+
+        $("#AddSchedule").load("@Url.Action("Create", "Schedules")");
+        $("#PopupAddSchedule").modal({ backdrop: "static" });
+    }
+
+    function UpdateSchedule() {
+        var grid = $("#listSchedule").data("kendoGrid");
+        var dataItem = grid.dataItem(grid.select());
+        $("#UpdateSchedule").load("@Url.Action("Update", "Schedules")" + "?id=" + dataItem.ID);
+        $("#PopupUpdateSchedule").modal({ backdrop: "static" });
+    }
+
+    function DeleteSchedule() {
+        var grid = $("#listSchedule").data("kendoGrid");
+        var dataItem = grid.dataItem(grid.select());
+
+        $.ajax({
+            type: "POST",
+            url: "@Url.Action("Delete", "Schedules")",
+            data: { id: dataItem.ID },
+            error: function(xhr, status, error) {
+                alert("fail");
+            },
+            success: function(response) {
+                if (response === "Error")
+                    swal({
+                        title: "!",
+                        text: "Có lỗi xảy ra, không thể xóa!",
+                        type: "error"
+                    });
+                else if (response === "OK") {
+                    swal({
+                            title: "!",
+                            text: "Thành công",
+                            type: "success"
+                        },
+                        function() {
+                            grid.dataSource.remove(dataItem);
+                        });
+                    grid.dataSource.remove(dataItem);
+                }
+            }
+        });
+    }
+
+    $(document).ready(function() {
+        $("#listSchedule").on("dblclick",
+            "tr.k-state-selected",
+            function() {
+                UpdateSchedule();
+            });
+
+    });
+</script>

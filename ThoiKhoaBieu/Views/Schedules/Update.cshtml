@@ -1,0 +1,114 @@
+﻿@model ThoiKhoaBieu.Models.Schedule
+
+@{
+    ViewBag.Title = "Create";
+    var thu = new SelectList(new List<SelectListItem>
+    {
+        new SelectListItem { Text = "Thứ 2", Value = "2"},
+        new SelectListItem { Text = "Thứ 3", Value = "3"},
+        new SelectListItem { Text = "Thứ 4", Value = "4"},
+        new SelectListItem { Text = "Thứ 5", Value = "5"},
+        new SelectListItem { Text = "Thứ 6", Value = "6"}
+    }, "Value", "Text");
+
+    var buoi = new SelectList(new List<SelectListItem>
+    {
+        new SelectListItem { Text = "Buổi sáng", Value = "0"},
+        new SelectListItem { Text = "Buổi chiều", Value = "1"}
+    }, "Value", "Text");
+}
+
+<style>
+    .FormItem {
+        margin-bottom: 10px;
+    }
+</style>
+
+<div class="col-xs-12">
+    <form action=@Url.Action("Update", "Schedules") id="MainForm" method="post">
+        <div class="col-sm-6 col-xs-12 FormItem" style="display: none;">
+            <label class="col-xs-4"> Mã </label>
+            <div class="col-xs-8">
+                @Html.TextBoxFor(m => m.ID, new { @class = "form-control" })
+            </div>
+        </div>
+        <div class="col-sm-6 col-xs-12 FormItem">
+            <label class="col-xs-4"> Thứ </label>
+            <div class="col-xs-8">
+                @Html.DropDownListFor(m => m.DayOfWeek, (SelectList)thu, new { @class = "form-control" })
+            </div>
+        </div>
+        <div class="col-sm-6 col-xs-12 FormItem">
+            <label class="col-xs-4"> Buổi </label>
+            <div class="col-xs-8">
+                @Html.DropDownListFor(m => m.PartOfDay, (SelectList)buoi, new { @class = "form-control" })
+            </div>
+        </div>
+        <div class="col-sm-6 col-xs-12 FormItem">
+            <label class="col-xs-4"> Bắt đầu </label>
+            <div class="col-xs-8">
+                @Html.TextBoxFor(m => m.TimeStart, new { @class = "form-control" })
+            </div>
+        </div>
+        <div class="col-sm-6 col-xs-12 FormItem">
+            <label class="col-xs-4"> Kết thúc </label>
+            <div class="col-xs-8">
+                @Html.TextBoxFor(m => m.TimeEnd, new { @class = "form-control" })
+            </div>
+        </div>
+        <div class="col-sm-6 col-xs-12 FormItem">
+            <label class="col-xs-4"> Phòng học </label>
+            <div class="col-xs-8">
+                @Html.DropDownListFor(m => m.RoomID, (SelectList)ViewBag.RoomID, new { @class = "form-control" })
+            </div>
+        </div>
+
+        <div class="col-sm-6 col-xs-12 FormItem">
+            <label class="col-xs-4"> Lớp học </label>
+            <div class="col-xs-8">
+                @Html.DropDownListFor(m => m.ClassID, (SelectList)ViewBag.ClassID, new { @class = "form-control" })
+            </div>
+        </div>
+        <div class="col-xs-12 FormItem">
+            <div class="col-xs-12">
+                <input class="btn btn-primary" value="OK" onclick="UpdateScheduleClick()" type="button" style="width: 100px; float: right;">
+            </div>
+        </div>
+    </form>
+</div>
+
+<script>
+    function UpdateScheduleClick() {
+        var $form = $("#MainForm");
+        $.ajax({
+            type: "POST",
+            url: $form.attr('action'),
+            data: $form.serialize(),
+            error: function (xhr, status, error) {
+                alert("fail");
+            },
+            success: function (response) {
+                if (response === "Error")
+                    swal({
+                        title: "!",
+                        text: "Có lỗi xảy ra, không thể thay đổi!",
+                        type: "error"
+                    });
+                else if (response === "OK") {
+                    swal({
+                        title: "!",
+                        text: "Thành công",
+                        type: "success"
+                    },
+                    function () {
+                        window.location.href = "@Url.Action("Index", "Schedules")";
+                    });
+                    window.location.href = "@Url.Action("Index", "Schedules")";
+                }
+                $('body').addSchedule('loaded');
+            }
+        });
+    }
+
+    $("#IncomingCallHeader").css("background-color: white");
+</script>

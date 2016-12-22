@@ -17,27 +17,36 @@ namespace ThoiKhoaBieu.Controllers
             context = new ApplicationDbContext();
         }
 
-        [Authorize(Roles = "Admin")]
+        // GET: Role
         public ActionResult Index()
         {
-            var roles = context.Roles.ToList();
-            return View(roles);
+            return View();
         }
 
-        [Authorize(Roles = "Admin")]
+        /// <summary>
+        /// Create  a New role
+        /// </summary>
+        /// <returns></returns>
         public ActionResult Create()
         {
-            var role = new IdentityRole();
-            return View(role);
+            var Role = new IdentityRole();
+            return View(Role);
         }
 
-        
+        /// <summary>
+        /// Create a New Role
+        /// </summary>
+        /// <param name="Role"></param>
+        /// <returns></returns>
         [HttpPost]
-        public ActionResult Create(IdentityRole role)
+        public ActionResult Create(IdentityRole Role)
         {
-            context.Roles.Add(role);
+
+            context.Roles.Add(Role);
             context.SaveChanges();
             return RedirectToAction("Index");
         }
+
+        
     }
 }

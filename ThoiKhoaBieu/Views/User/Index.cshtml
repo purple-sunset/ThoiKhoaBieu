@@ -1,0 +1,144 @@
+﻿@using Kendo.Mvc.UI
+@using ThoiKhoaBieu.Models
+@model IEnumerable<ThoiKhoaBieu.Models.UserViewModel>
+
+@{
+    ViewBag.Title = "Danh sách môn học";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+    
+}
+
+<div class="row">
+    <div class="col-lg-12">
+        <h2 class="page-header" style="text-align: center;">@ViewBag.Title</h2>
+    </div>
+    <!-- /.col-lg-12 -->
+</div>
+
+<div class="row">
+    <div class="col-lg-12">
+        <div class="panel panel-primary">
+            <div class="panel-body">
+                <input class="btn btn-primary" value="THÊM" id="AddUserButton" onclick="AddUser()" type="button" style="width: 100px">
+                <input class="btn btn-info" value="SỬA" id="UpdateUserButton" onclick="UpdateUser()" type="button" style="width: 100px">
+                <input class="btn btn-danger" value="XÓA" id="DeleteUserButton" onclick="DeleteUser()" type="button" style="width: 100px">
+                
+
+                @(Html.Kendo().Grid(Model)
+                      .Name("listUser")
+                      .Columns(columns =>
+                      {
+                          columns.Bound(p => p.UserId).Width(200);
+                          columns.Bound(p => p.UserName).Width(200);
+                          columns.Bound(p => p.Email).Width(200);
+                          columns.Bound(p => p.Role).Width(200);
+
+                      })
+                      .HtmlAttributes(new {style = "height:400px;"})
+                      .Pageable(pageable => pageable
+                          .Input(true)
+                          .Numeric(false)
+                      )
+
+                      .Scrollable()
+                      .Selectable(selectable => selectable
+                          .Mode(GridSelectionMode.Multiple))
+                      .Navigatable()
+                      .DataSource(dataSource => dataSource
+                          .Ajax()
+                          .PageSize(20)
+                          .ServerOperation(false)
+                      )
+                      )
+                
+                <div class="modal" role="dialog" id="PopupAddUser" style="overflow-y: scroll;">
+                    <div style="height: 357px;" class="modal-backdrop  in"></div>
+                    <div class="modal-dialog modal-lg">
+                        <div class="modal-content">
+                            <div class="modal-header">
+                                <button type="button" class="close" data-dismiss="modal">×</button>
+                                <h4 class="modal-title">THÊM NGƯỜI DÙNG</h4>
+                            </div>
+                            <div class="modal-body">
+                                <div id="AddUser"></div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="modal" role="dialog" id="PopupUpdateUser" style="overflow-y: scroll;">
+                    <div style="height: 357px;" class="modal-backdrop  in"></div>
+                    <div class="modal-dialog modal-lg">
+                        <div class="modal-content">
+                            <div class="modal-header">
+                                <button type="button" class="close" data-dismiss="modal">×</button>
+                                <h4 class="modal-title">THÔNG TIN NGƯỜI DÙNG</h4>
+                            </div>
+                            <div class="modal-body">
+                                <div id="UpdateUser"></div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+
+    function AddUser() {
+
+        $("#AddUser").load("@Url.Action("Create", "Users")");
+        $("#PopupAddUser").modal({ backdrop: "static" });
+    }
+
+    function UpdateUser() {
+        var grid = $("#listUser").data("kendoGrid");
+        var dataItem = grid.dataItem(grid.select());
+        $("#UpdateUser").load("@Url.Action("Update", "Users")" + "?id=" + dataItem.ID);
+        $("#PopupUpdateUser").modal({ backdrop: "static" });
+    }
+
+    function DeleteUser() {
+        var grid = $("#listUser").data("kendoGrid");
+        var dataItem = grid.dataItem(grid.select());
+
+        $.ajax({
+            type: "POST",
+            url: "@Url.Action("Delete", "Users")",
+            data: { id: dataItem.ID },
+            error: function(xhr, status, error) {
+                alert("fail");
+            },
+            success: function(response) {
+                if (response === "Error")
+                    swal({
+                        title: "!",
+                        text: "Có lỗi xảy ra, không thể xóa!",
+                        type: "error"
+                    });
+                else if (response === "OK") {
+                    swal({
+                            title: "!",
+                            text: "Thành công",
+                            type: "success"
+                        },
+                        function() {
+                            grid.dataSource.remove(dataItem);
+                        });
+                    grid.dataSource.remove(dataItem);
+                }
+            }
+        });
+    }
+
+    $(document).ready(function() {
+        $("#listUser").on("dblclick",
+            "tr.k-state-selected",
+            function() {
+                UpdateUser();
+            });
+
+    });
+</script>

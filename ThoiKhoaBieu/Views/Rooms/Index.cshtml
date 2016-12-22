@@ -1,0 +1,144 @@
+﻿@using Kendo.Mvc.UI
+@using ThoiKhoaBieu.Models
+@model IEnumerable<ThoiKhoaBieu.Models.Room>
+
+@{
+    ViewBag.Title = "Danh sách môn học";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+    
+}
+
+<div class="row">
+    <div class="col-lg-12">
+        <h2 class="page-header" style="text-align: center;">@ViewBag.Title</h2>
+    </div>
+    <!-- /.col-lg-12 -->
+</div>
+
+<div class="row">
+    <div class="col-lg-12">
+        <div class="panel panel-primary">
+            <div class="panel-body">
+                <input class="btn btn-primary" value="THÊM" id="AddRoomButton" onclick="AddRoom()" type="button" style="width: 100px">
+                <input class="btn btn-info" value="SỬA" id="UpdateRoomButton" onclick="UpdateRoom()" type="button" style="width: 100px">
+                <input class="btn btn-danger" value="XÓA" id="DeleteRoomButton" onclick="DeleteRoom()" type="button" style="width: 100px">
+                
+
+                @(Html.Kendo().Grid(Model)
+                      .Name("listRoom")
+                      .Columns(columns =>
+                      {
+                          columns.Bound(p => p.ID).Width(200);
+                          columns.Bound(p => p.Name).Width(200);
+                          columns.Bound(p => p.Capacity).Width(200);
+                          columns.Bound(p => p.HasProjector).ClientTemplate("#= HasProjector ? 'Có' : 'Không' #").Width(100);
+
+                      })
+                      .HtmlAttributes(new {style = "height:400px;"})
+                      .Pageable(pageable => pageable
+                          .Input(true)
+                          .Numeric(false)
+                      )
+
+                      .Scrollable()
+                      .Selectable(selectable => selectable
+                          .Mode(GridSelectionMode.Multiple))
+                      .Navigatable()
+                      .DataSource(dataSource => dataSource
+                          .Ajax()
+                          .PageSize(20)
+                          .ServerOperation(false)
+                      )
+                      )
+                
+                <div class="modal" role="dialog" id="PopupAddRoom" style="overflow-y: scroll;">
+                    <div style="height: 357px;" class="modal-backdrop  in"></div>
+                    <div class="modal-dialog modal-lg">
+                        <div class="modal-content">
+                            <div class="modal-header">
+                                <button type="button" class="close" data-dismiss="modal">×</button>
+                                <h4 class="modal-title">THÊM MÔN HỌC</h4>
+                            </div>
+                            <div class="modal-body">
+                                <div id="AddRoom"></div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="modal" role="dialog" id="PopupUpdateRoom" style="overflow-y: scroll;">
+                    <div style="height: 357px;" class="modal-backdrop  in"></div>
+                    <div class="modal-dialog modal-lg">
+                        <div class="modal-content">
+                            <div class="modal-header">
+                                <button type="button" class="close" data-dismiss="modal">×</button>
+                                <h4 class="modal-title">THÔNG TIN MÔN HỌC</h4>
+                            </div>
+                            <div class="modal-body">
+                                <div id="UpdateRoom"></div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+
+    function AddRoom() {
+
+        $("#AddRoom").load("@Url.Action("Create", "Rooms")");
+        $("#PopupAddRoom").modal({ backdrop: "static" });
+    }
+
+    function UpdateRoom() {
+        var grid = $("#listRoom").data("kendoGrid");
+        var dataItem = grid.dataItem(grid.select());
+        $("#UpdateRoom").load("@Url.Action("Update", "Rooms")" + "?id=" + dataItem.ID);
+        $("#PopupUpdateRoom").modal({ backdrop: "static" });
+    }
+
+    function DeleteRoom() {
+        var grid = $("#listRoom").data("kendoGrid");
+        var dataItem = grid.dataItem(grid.select());
+
+        $.ajax({
+            type: "POST",
+            url: "@Url.Action("Delete", "Rooms")",
+            data: { id: dataItem.ID },
+            error: function(xhr, status, error) {
+                alert("fail");
+            },
+            success: function(response) {
+                if (response === "Error")
+                    swal({
+                        title: "!",
+                        text: "Có lỗi xảy ra, không thể xóa!",
+                        type: "error"
+                    });
+                else if (response === "OK") {
+                    swal({
+                            title: "!",
+                            text: "Thành công",
+                            type: "success"
+                        },
+                        function() {
+                            grid.dataSource.remove(dataItem);
+                        });
+                    grid.dataSource.remove(dataItem);
+                }
+            }
+        });
+    }
+
+    $(document).ready(function() {
+        $("#listRoom").on("dblclick",
+            "tr.k-state-selected",
+            function() {
+                UpdateRoom();
+            });
+
+    });
+</script>

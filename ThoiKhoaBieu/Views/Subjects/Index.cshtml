@@ -1,0 +1,143 @@
+﻿@using Kendo.Mvc.UI
+@using ThoiKhoaBieu.Models
+@model IEnumerable<ThoiKhoaBieu.Models.Subject>
+
+@{
+    ViewBag.Title = "Danh sách môn học";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+    
+}
+
+<div class="row">
+    <div class="col-lg-12">
+        <h2 class="page-header" style="text-align: center;">@ViewBag.Title</h2>
+    </div>
+    <!-- /.col-lg-12 -->
+</div>
+
+<div class="row">
+    <div class="col-lg-12">
+        <div class="panel panel-primary">
+            <div class="panel-body">
+                <input class="btn btn-primary" value="THÊM" id="AddSubjectButton" onclick="AddSubject()" type="button" style="width: 100px">
+                <input class="btn btn-info" value="SỬA" id="UpdateSubjectButton" onclick="UpdateSubject()" type="button" style="width: 100px">
+                <input class="btn btn-danger" value="XÓA" id="DeleteSubjectButton" onclick="DeleteSubject()" type="button" style="width: 100px">
+                
+
+                @(Html.Kendo().Grid(Model)
+                      .Name("listSubject")
+                      .Columns(columns =>
+                      {
+                          columns.Bound(p => p.ID).Width(200);
+                          columns.Bound(p => p.Name).Width(200);
+                          columns.Bound(p => p.RequireProjector).ClientTemplate("#= RequireProjector ? 'Có' : 'Không' #").Width(100);
+
+                      })
+                      .HtmlAttributes(new {style = "height:400px;"})
+                      .Pageable(pageable => pageable
+                          .Input(true)
+                          .Numeric(false)
+                      )
+
+                      .Scrollable()
+                      .Selectable(selectable => selectable
+                          .Mode(GridSelectionMode.Multiple))
+                      .Navigatable()
+                      .DataSource(dataSource => dataSource
+                          .Ajax()
+                          .PageSize(20)
+                          .ServerOperation(false)
+                      )
+                      )
+                
+                <div class="modal" role="dialog" id="PopupAddSubject" style="overflow-y: scroll;">
+                    <div style="height: 357px;" class="modal-backdrop  in"></div>
+                    <div class="modal-dialog modal-lg">
+                        <div class="modal-content">
+                            <div class="modal-header">
+                                <button type="button" class="close" data-dismiss="modal">×</button>
+                                <h4 class="modal-title">THÊM MÔN HỌC</h4>
+                            </div>
+                            <div class="modal-body">
+                                <div id="AddSubject"></div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="modal" role="dialog" id="PopupUpdateSubject" style="overflow-y: scroll;">
+                    <div style="height: 357px;" class="modal-backdrop  in"></div>
+                    <div class="modal-dialog modal-lg">
+                        <div class="modal-content">
+                            <div class="modal-header">
+                                <button type="button" class="close" data-dismiss="modal">×</button>
+                                <h4 class="modal-title">THÔNG TIN MÔN HỌC</h4>
+                            </div>
+                            <div class="modal-body">
+                                <div id="UpdateSubject"></div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+
+    function AddSubject() {
+
+        $("#AddSubject").load("@Url.Action("Create", "Subjects")");
+        $("#PopupAddSubject").modal({ backdrop: "static" });
+    }
+
+    function UpdateSubject() {
+        var grid = $("#listSubject").data("kendoGrid");
+        var dataItem = grid.dataItem(grid.select());
+        $("#UpdateSubject").load("@Url.Action("Update", "Subjects")" + "?id=" + dataItem.ID);
+        $("#PopupUpdateSubject").modal({ backdrop: "static" });
+    }
+
+    function DeleteSubject() {
+        var grid = $("#listSubject").data("kendoGrid");
+        var dataItem = grid.dataItem(grid.select());
+
+        $.ajax({
+            type: "POST",
+            url: "@Url.Action("Delete", "Subjects")",
+            data: { id: dataItem.ID },
+            error: function(xhr, status, error) {
+                alert("fail");
+            },
+            success: function(response) {
+                if (response === "Error")
+                    swal({
+                        title: "!",
+                        text: "Có lỗi xảy ra, không thể xóa!",
+                        type: "error"
+                    });
+                else if (response === "OK") {
+                    swal({
+                            title: "!",
+                            text: "Thành công",
+                            type: "success"
+                        },
+                        function() {
+                            grid.dataSource.remove(dataItem);
+                        });
+                    grid.dataSource.remove(dataItem);
+                }
+            }
+        });
+    }
+
+    $(document).ready(function() {
+        $("#listSubject").on("dblclick",
+            "tr.k-state-selected",
+            function() {
+                UpdateSubject();
+            });
+
+    });
+</script>

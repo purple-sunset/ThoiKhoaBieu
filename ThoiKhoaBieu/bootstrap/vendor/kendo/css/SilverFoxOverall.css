@@ -1,0 +1,67 @@
+.k-grid th {
+    font-size: 13px;
+}
+
+.k-grid td {
+    font-size: 13px;
+}
+
+.GridWrap .k-grid {
+    min-width: 420px;
+}
+
+.k-icon {
+    margin: 6px !important;
+}
+
+.k-window-title {
+    color: black;
+}
+
+.k-pager-numbers {
+    left: 5.7em !important;
+}
+
+.GridWrap {
+    overflow: scroll;
+    overflow-y: hidden;
+}
+
+.ReportViewerWrap {
+    min-width: 1024px;
+    min-height: 600px;
+}
+
+.modal-content {
+    overflow: hidden;
+    padding-top: 10px;
+    padding-bottom: 10px;
+}
+
+.modal-body {
+    padding-top: 10px;
+    padding-bottom: 10px;
+}
+
+#AddCustomerButton, #EditCustomerButton, #DeleteCustomerButton, 
+#AddStaffButton, #EditStaffButton, #DeleteStaffButton {
+    width: 100px;
+}
+
+.ChooseTypeButton {
+    margin-right: 10px;
+    margin-bottom: 10px;
+    float: right;
+    min-width: 90px;
+}
+.UpdateButton {
+    width: 100px;
+}
+
+.editor-label {
+    margin-bottom: 10px;
+}
+
+.editor-field {
+    margin-bottom: 10px;
+}

@@ -1,0 +1,144 @@
+﻿@using Kendo.Mvc.UI
+@using ThoiKhoaBieu.Models
+@model IEnumerable<ThoiKhoaBieu.Models.ClassViewModel>
+
+@{
+    ViewBag.Title = "Danh sách môn học";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+    
+}
+
+<div class="row">
+    <div class="col-lg-12">
+        <h2 class="page-header" style="text-align: center;">@ViewBag.Title</h2>
+    </div>
+    <!-- /.col-lg-12 -->
+</div>
+
+<div class="row">
+    <div class="col-lg-12">
+        <div class="panel panel-primary">
+            <div class="panel-body">
+                <input class="btn btn-primary" value="THÊM" id="AddClassButton" onclick="AddClass()" type="button" style="width: 100px">
+                <input class="btn btn-info" value="SỬA" id="UpdateClassButton" onclick="UpdateClass()" type="button" style="width: 100px">
+                <input class="btn btn-danger" value="XÓA" id="DeleteClassButton" onclick="DeleteClass()" type="button" style="width: 100px">
+                
+
+                @(Html.Kendo().Grid(Model)
+                      .Name("listClass")
+                      .Columns(columns =>
+                      {
+                          columns.Bound(p => p.ID).Width(200);
+                          columns.Bound(p => p.Name).Width(200);
+                          columns.Bound(p => p.TimeCount).Width(100);
+                          columns.Bound(p => p.SubjectName).Width(200);
+
+                      })
+                      .HtmlAttributes(new {style = "height:400px;"})
+                      .Pageable(pageable => pageable
+                          .Input(true)
+                          .Numeric(false)
+                      )
+
+                      .Scrollable()
+                      .Selectable(selectable => selectable
+                          .Mode(GridSelectionMode.Multiple))
+                      .Navigatable()
+                      .DataSource(dataSource => dataSource
+                          .Ajax()
+                          .PageSize(20)
+                          .ServerOperation(false)
+                      )
+                      )
+                
+                <div class="modal" role="dialog" id="PopupAddClass" style="overflow-y: scroll;">
+                    <div style="height: 357px;" class="modal-backdrop  in"></div>
+                    <div class="modal-dialog modal-lg">
+                        <div class="modal-content">
+                            <div class="modal-header">
+                                <button type="button" class="close" data-dismiss="modal">×</button>
+                                <h4 class="modal-title">THÊM LỚP HỌC</h4>
+                            </div>
+                            <div class="modal-body">
+                                <div id="AddClass"></div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="modal" role="dialog" id="PopupUpdateClass" style="overflow-y: scroll;">
+                    <div style="height: 357px;" class="modal-backdrop  in"></div>
+                    <div class="modal-dialog modal-lg">
+                        <div class="modal-content">
+                            <div class="modal-header">
+                                <button type="button" class="close" data-dismiss="modal">×</button>
+                                <h4 class="modal-title">THÔNG TIN LỚP HỌC</h4>
+                            </div>
+                            <div class="modal-body">
+                                <div id="UpdateClass"></div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+
+    function AddClass() {
+
+        $("#AddClass").load("@Url.Action("Create", "Classes")");
+        $("#PopupAddClass").modal({ backdrop: "static" });
+    }
+
+    function UpdateClass() {
+        var grid = $("#listClass").data("kendoGrid");
+        var dataItem = grid.dataItem(grid.select());
+        $("#UpdateClass").load("@Url.Action("Update", "Classes")" + "?id=" + dataItem.ID);
+        $("#PopupUpdateClass").modal({ backdrop: "static" });
+    }
+
+    function DeleteClass() {
+        var grid = $("#listClass").data("kendoGrid");
+        var dataItem = grid.dataItem(grid.select());
+
+        $.ajax({
+            type: "POST",
+            url: "@Url.Action("Delete", "Classes")",
+            data: { id: dataItem.ID },
+            error: function(xhr, status, error) {
+                alert("fail");
+            },
+            success: function(response) {
+                if (response === "Error")
+                    swal({
+                        title: "!",
+                        text: "Có lỗi xảy ra, không thể xóa!",
+                        type: "error"
+                    });
+                else if (response === "OK") {
+                    swal({
+                            title: "!",
+                            text: "Thành công",
+                            type: "success"
+                        },
+                        function() {
+                            grid.dataSource.remove(dataItem);
+                        });
+                    grid.dataSource.remove(dataItem);
+                }
+            }
+        });
+    }
+
+    $(document).ready(function() {
+        $("#listClass").on("dblclick",
+            "tr.k-state-selected",
+            function() {
+                UpdateClass();
+            });
+
+    });
+</script>

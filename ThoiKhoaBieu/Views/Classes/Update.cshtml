@@ -1,0 +1,81 @@
+﻿@model ThoiKhoaBieu.Models.Class
+
+@{
+    ViewBag.Title = "Create";
+}
+
+<style>
+    .FormItem {
+        margin-bottom: 10px;
+    }
+</style>
+
+<div class="col-xs-12">
+    <form action=@Url.Action("Update", "Classes") id="MainForm" method="post">
+        <div class="col-sm-6 col-xs-12 FormItem" style="display: none;">
+            <label class="col-xs-4"> Mã Lớp Học </label>
+            <div class="col-xs-8">
+                @Html.TextBoxFor(m => m.ID, new { @class = "form-control" })
+            </div>
+        </div>
+        <div class="col-sm-6 col-xs-12 FormItem">
+            <label class="col-xs-4"> Tên Lớp Học </label>
+            <div class="col-xs-8">
+                @Html.TextBoxFor(m => m.Name, new { @class = "form-control" })
+            </div>
+        </div>
+        <div class="col-sm-6 col-xs-12 FormItem">
+            <label class="col-xs-4"> Số tiết </label>
+            <div class="col-xs-8">
+                @Html.TextBoxFor(m => m.TimeCount, new { @class = "form-control" })
+            </div>
+        </div>
+        <div class="col-sm-6 col-xs-12 FormItem">
+            <label class="col-xs-4"> Môn học </label>
+            <div class="col-xs-8">
+                @Html.DropDownListFor(m => m.SubjectID, (SelectList)ViewBag.SubjectID, new { @class = "form-control" })
+            </div>
+        </div>
+        <div class="col-xs-12 FormItem">
+            <div class="col-xs-12">
+                <input class="btn btn-primary" value="OK" onclick="UpdateClassClick()" type="button" style="width: 100px; float: right;">
+            </div>
+        </div>
+    </form>
+</div>
+
+<script>
+    function UpdateClassClick() {
+        var $form = $("#MainForm");
+        $.ajax({
+            type: "POST",
+            url: $form.attr('action'),
+            data: $form.serialize(),
+            error: function (xhr, status, error) {
+                alert("fail");
+            },
+            success: function (response) {
+                if (response === "Error")
+                    swal({
+                        title: "!",
+                        text: "Có lỗi xảy ra, không thể thay đổi lớp học!",
+                        type: "error"
+                    });
+                else if (response === "OK") {
+                    swal({
+                        title: "!",
+                        text: "Thành công",
+                        type: "success"
+                    },
+                    function () {
+                        window.location.href = "@Url.Action("Index", "Classes")";
+                    });
+                    window.location.href = "@Url.Action("Index", "Classes")";
+                }
+                $('body').addClass('loaded');
+            }
+        });
+    }
+
+    $("#IncomingCallHeader").css("background-color: white");
+</script>
